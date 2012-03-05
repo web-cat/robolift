@@ -1,0 +1,113 @@
+<project name="robolift" default="device" basedir=".">
+
+	<!-- Load external properties. -->
+	<property file="local.properties" />
+	<property name="base.sdk" value="android-8"/>
+	<property name="google.addon.sdk" value="addon-google_apis-google_inc_-8"/>
+
+    <fail message="The 'sdk.dir' property is missing. Please create a file in
+    	           the same directory as build.xml called 'local.properties'
+    	           and set the 'sdk.dir' property to be the path to the Android
+    	           SDK on your system."
+          unless="sdk.dir" />
+
+
+	<!-- Source paths for building RoboLIFT. -->
+	<path id="base.src">
+		<pathelement location="base/src"/>
+	</path>
+
+	<path id="device.src">
+		<path refid="base.src"/>
+		<pathelement location="device/src"/>
+	</path>
+
+	<path id="robolectric.src">
+		<path refid="base.src"/>
+		<pathelement location="robolectric/src"/>
+	</path>
+
+	
+	<!-- Classpaths for building RoboLIFT. -->
+	<path id="base.classpath">
+		<pathelement location="${sdk.dir}/platforms/${base.sdk}/android.jar"/>
+		<pathelement location="${sdk.dir}/add-ons/${google.addon.sdk}/libs/maps.jar"/>
+	</path>
+
+	<path id="device.classpath">
+		<path refid="base.classpath"/>
+	</path>
+
+	<path id="robolectric.classpath">
+		<path refid="device.classpath"/>
+		<pathelement location="${junit4.jar}"/>
+		<pathelement location="${ant.home}/lib/ant.jar"/>
+		<pathelement location="${ant.home}/lib/ant-junit.jar"/>
+		<pathelement location="${ant.home}/lib/ant-junit4.jar"/>
+		<pathelement location="robolectric/lib/robolectric-all.jar"/>
+		<pathelement location="robolectric/lib/sanselan-0.97-incubator.jar"/>
+	</path>
+
+			
+	<!-- Build targets -->
+	<target name="-init">
+		<mkdir dir="build"/>
+		<mkdir dir="build/classes"/>
+	</target>
+
+
+	<target name="device" depends="-init">
+		<javac destdir="build/classes"
+			   includeantruntime="false"
+			   source="1.5" target="1.5">
+			<src refid="device.src"/>
+			<classpath refid="device.classpath"/>
+		</javac>
+		<jar destfile="build/robolift-device.jar">
+			<fileset dir="build/classes"/>
+		</jar>
+		<delete dir="build/classes"/>
+	</target>
+
+	
+	<target name="robolectric" depends="-init">
+		<javac destdir="build/classes"
+			   includeantruntime="false"
+			   source="1.5" target="1.5">
+			<src refid="robolectric.src"/>
+			<classpath refid="robolectric.classpath"/>
+		</javac>
+		<jar destfile="build/robolift-robolectric.jar">
+			<fileset dir="build/classes"/>
+		</jar>
+		<delete dir="build/classes"/>
+	</target>
+
+
+    <target name="javadoc">
+        <javadoc access="protected"
+                 author="true"
+                 destdir="doc"
+                 doctitle="RoboLIFT"
+                 packagenames="student,student.android"
+                 source="1.5"
+                 splitindex="true"
+                 use="true"
+                 version="true">
+        	<sourcepath refid="device.src"/>
+        	<classpath refid="device.classpath"/>
+            <link offline="true"
+                  href="http://developer.android.com/reference/"
+                  packagelistLoc="${sdk.dir}/docs/reference"/>
+        	<link offline="true"
+        		  href="code.google.com/android/add-ons/google-apis/reference"
+        	      packagelistLoc="${sdk.dir}/add-ons/${google.addon.sdk}/docs/reference"/>
+        </javadoc>
+    </target>
+
+
+	<target name="clean">
+		<delete dir="build"/>
+	</target>
+
+</project>
